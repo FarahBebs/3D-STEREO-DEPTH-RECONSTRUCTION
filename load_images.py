@@ -61,8 +61,6 @@ def rectify_stereo_pair(left_image, right_image, camera_params):
     - right_rectified: Rectified right image
     - Q: Disparity-to-depth mapping matrix (for OpenCV compatibility)
     """
-    # For synthetic data, images are already aligned
-    # In a real application, you would use cv2.stereoRectify and cv2.initUndistortRectifyMap
 
     left_rectified = left_image.copy()
     right_rectified = right_image.copy()

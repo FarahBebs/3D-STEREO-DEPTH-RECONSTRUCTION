@@ -21,7 +21,7 @@ def ssd_residuals(disparity, left_block, right_image, x, y, half_block):
     """
     d = int(disparity[0])
     if x - d - half_block < 0 or x - d + half_block + 1 > right_image.shape[1]:
-        # Large penalty for out of bounds
+
         return np.full_like(left_block, 1000)
 
     right_block = right_image[y - half_block:y + half_block + 1,
@@ -60,7 +60,6 @@ def optimize_disparity_levenberg_marquardt(left_image, right_image, block_size=1
 
     half_block = block_size // 2
 
-    # Select pixels to optimize
     np.random.seed(42)
     pixels_to_optimize = []
 
@@ -74,25 +73,21 @@ def optimize_disparity_levenberg_marquardt(left_image, right_image, block_size=1
     successful_optimizations = 0
 
     for y, x in pixels_to_optimize:
-        # Extract and flatten left block
+
         left_block = left_gray[y - half_block:y + half_block + 1,
                                x - half_block:x + half_block + 1].flatten()
 
-        # Initial guess
         x0 = np.array([max_disparity // 2])
 
-        # Define residual function
         def residuals(d):
             return ssd_residuals(d, left_block, right_gray, x, y, half_block)
 
-        # Optimize using Levenberg-Marquardt
         try:
             result = least_squares(residuals, x0, method='lm', max_nfev=50)
 
             optimal_d = np.clip(result.x[0], 0, max_disparity)
             disparity_map[y, x] = optimal_d
 
-            # Store final error
             final_error = np.sum(result.fun ** 2)
             all_error_histories.append(final_error)
 
@@ -126,7 +121,7 @@ def plot_optimization_error(error_history, title="Optimization Error vs Iteratio
     plt.ylabel('SSD Error')
     plt.title(title)
     plt.grid(True, alpha=0.3)
-    plt.yscale('log')  # Log scale for better visualization
+    plt.yscale('log')
     plt.tight_layout()
 
     if save_path:

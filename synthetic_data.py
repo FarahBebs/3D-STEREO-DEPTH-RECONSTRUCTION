@@ -20,7 +20,6 @@ def generate_synthetic_stereo_pair(image_path=None, shift_pixels=50, baseline=0.
     - camera_params: Dictionary with camera intrinsics and extrinsics
     """
     if image_path is None:
-        # Create a simple synthetic scene: a grid of squares at different depths
         height, width = 400, 600
         left_image = np.zeros((height, width, 3), dtype=np.uint8)
 
@@ -35,7 +34,6 @@ def generate_synthetic_stereo_pair(image_path=None, shift_pixels=50, baseline=0.
             end_x = start_x + 100
             left_image[start_y:end_y, start_x:end_x] = color
 
-        # Add some texture
         for y in range(0, height, 20):
             cv2.line(left_image, (0, y), (width, y), (128, 128, 128), 1)
         for x in range(0, width, 20):
@@ -47,18 +45,14 @@ def generate_synthetic_stereo_pair(image_path=None, shift_pixels=50, baseline=0.
 
     height, width = left_image.shape[:2]
 
-    # Create right image by shifting left image to the right
     right_image = np.zeros_like(left_image)
     right_image[:, shift_pixels:] = left_image[:, :-shift_pixels]
 
-    # Fill the left side of right image with background
     right_image[:, :shift_pixels] = left_image[:, :shift_pixels]
 
-    # Ground truth disparity: constant shift_pixels for the shifted region
     ground_truth_disparity = np.zeros((height, width), dtype=np.float32)
     ground_truth_disparity[:, shift_pixels:] = shift_pixels
 
-    # Camera parameters
     camera_params = {
         'focal_length': focal_length,  # fx = fy = focal_length
         'cx': width // 2,
@@ -99,7 +93,6 @@ def visualize_synthetic_data(left_image, right_image, ground_truth_disparity, sa
 
 
 if __name__ == "__main__":
-    # Generate synthetic data
     left, right, gt_disp, cam_params = generate_synthetic_stereo_pair()
 
     print("Camera Parameters:")

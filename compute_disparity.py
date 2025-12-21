@@ -26,32 +26,26 @@ def compute_disparity_block_matching(left_image, right_image, block_size=15, max
 
     height, width = left_gray.shape
 
-    # Initialize disparity map
     disparity_map = np.zeros((height, width), dtype=np.float32)
 
-    # Half block size for boundary handling
     half_block = block_size // 2
 
     for y in range(half_block, height - half_block):
         for x in range(half_block, width - half_block):
-            # Extract left block
+
             left_block = left_gray[y - half_block:y + half_block + 1,
                                    x - half_block:x + half_block + 1]
 
-            # Search for best match in right image
             min_ssd = float('inf')
             best_disparity = 0
 
-            # Search from x - max_disparity to x
             for d in range(max_disparity + 1):
                 if x - d - half_block < 0:
                     continue
 
-                # Extract right block
                 right_block = right_gray[y - half_block:y + half_block + 1,
                                          x - d - half_block:x - d + half_block + 1]
 
-                # Compute SSD
                 ssd = np.sum((left_block - right_block) ** 2)
 
                 if ssd < min_ssd:
@@ -118,8 +112,7 @@ def compute_disparity_optimization(left_image, right_image, block_size=15, max_d
 
     half_block = block_size // 2
 
-    # Select random pixels to optimize (for performance demonstration)
-    np.random.seed(42)  # For reproducibility
+    np.random.seed(42)
     pixels_to_optimize = []
 
     for _ in range(num_pixels):
@@ -139,9 +132,8 @@ def compute_disparity_optimization(left_image, right_image, block_size=15, max_d
         def cost(d):
             return ssd_cost_function(d, left_block, right_gray, x, y, half_block)
 
-        # Optimize using the chosen method
         if method == 'gradient_descent':
-            # Simple gradient descent implementation
+
             d_current = max_disparity // 2
             learning_rate = 0.1
             max_iter = 100
@@ -152,7 +144,6 @@ def compute_disparity_optimization(left_image, right_image, block_size=15, max_d
                 error = cost(d_current)
                 error_history.append(error)
 
-                # Numerical gradient
                 grad = (cost(d_current + 1) - cost(d_current - 1)) / 2
 
                 if abs(grad) < tolerance:
@@ -165,7 +156,7 @@ def compute_disparity_optimization(left_image, right_image, block_size=15, max_d
             iterations = len(error_history)
 
         elif method == 'golden_section':
-            # Use scipy's minimize_scalar with golden section search
+
             result = minimize_scalar(cost, bounds=(
                 0, max_disparity), method='golden')
             optimal_d = result.x
@@ -205,7 +196,6 @@ def save_disparity_map(disparity_map, filename):
     """
     Save disparity map as image file.
     """
-    # Normalize to 0-255 for saving
     disp_norm = cv2.normalize(disparity_map, None, 0,
                               255, cv2.NORM_MINMAX, cv2.CV_8U)
     cv2.imwrite(filename, disp_norm)

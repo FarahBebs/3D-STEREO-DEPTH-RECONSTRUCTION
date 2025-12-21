@@ -24,13 +24,10 @@ def disparity_to_depth(disparity_map, focal_length, baseline, max_depth=50.0):
     Returns:
     - depth_map: Depth map in meters
     """
-    # Avoid division by zero and set minimum disparity
     disparity_map = np.where(disparity_map < 1e-6, 1e-6, disparity_map)
 
-    # Convert disparity to depth
     depth_map = (focal_length * baseline) / disparity_map
 
-    # Set maximum depth limit
     depth_map = np.where(depth_map > max_depth, max_depth, depth_map)
 
     return depth_map
@@ -40,20 +37,16 @@ def visualize_depth_map(depth_map, title="Depth Map", max_depth=None, save_path=
     """
     Visualize depth map as a heatmap.
     """
-    # Replace infinite depths with a large value for visualization
     depth_vis = np.where(np.isinf(depth_map), np.nanmax(
         depth_map[np.isfinite(depth_map)]), depth_map)
 
     if max_depth is None:
-        # Use 95th percentile to avoid outliers
         max_depth = np.nanpercentile(depth_vis, 95)
 
     plt.figure(figsize=(10, 8))
 
-    # Create heatmap
     im = plt.imshow(depth_vis, cmap='plasma_r', vmin=0, vmax=max_depth)
 
-    # Add colorbar
     cbar = plt.colorbar(im, label='Depth (meters)')
     cbar.set_ticks(np.linspace(0, max_depth, 6))
 
@@ -72,7 +65,6 @@ def create_depth_histogram(depth_map, bins=50, title="Depth Distribution", save_
     """
     Create histogram of depth values.
     """
-    # Filter out infinite depths
     finite_depths = depth_map[np.isfinite(depth_map)]
 
     plt.figure(figsize=(10, 6))
@@ -115,19 +107,14 @@ def compute_depth_accuracy(predicted_depth, ground_truth_depth, mask=None):
     if len(pred) == 0:
         return {'error': np.nan, 'rmse': np.nan, 'mae': np.nan, 'rel_error': np.nan}
 
-    # Absolute error
     abs_error = np.abs(pred - gt)
 
-    # Root Mean Square Error
     rmse = np.sqrt(np.mean((pred - gt) ** 2))
 
-    # Mean Absolute Error
     mae = np.mean(abs_error)
 
-    # Relative error (percentage)
     rel_error = np.mean(abs_error / gt) * 100
 
-    # Threshold accuracy (delta < 1.25)
     delta = np.maximum(pred / gt, gt / pred)
     acc_125 = np.mean(delta < 1.25) * 100
 
@@ -166,7 +153,6 @@ def compare_depth_maps(depth1, depth2, label1="Method 1", label2="Method 2", gro
     """
     print(f"\n=== Depth Map Comparison: {label1} vs {label2} ===")
 
-    # Statistics for both maps
     print_depth_statistics(depth1, f"{label1} Statistics")
     print_depth_statistics(depth2, f"{label2} Statistics")
 

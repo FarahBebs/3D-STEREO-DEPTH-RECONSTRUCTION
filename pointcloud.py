@@ -78,32 +78,28 @@ def visualize_point_cloud(point_cloud_data, window_name="3D Point Cloud", save_p
     """
     if OPEN3D_AVAILABLE:
         point_cloud = point_cloud_data
-        # Create visualizer
+
         vis = o3d.visualization.Visualizer()
         vis.create_window(window_name=window_name, width=800, height=600)
 
-        # Add point cloud
         vis.add_geometry(point_cloud)
 
-        # Set rendering options
         render_option = vis.get_render_option()
         render_option.point_size = 1.0
         render_option.background_color = np.asarray(
             [0.1, 0.1, 0.1])  # Dark background
 
-        # Set camera view
         ctr = vis.get_view_control()
         ctr.set_zoom(0.8)
         ctr.set_front([0, 0, -1])  # Look from front
         ctr.set_lookat([0, 0, 2])  # Look at center
         ctr.set_up([0, -1, 0])     # Up direction
 
-        # Run visualization
         vis.run()
         vis.destroy_window()
     else:
         points, colors = point_cloud_data
-        # Use matplotlib for 3D visualization
+
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111, projection='3d')
 
@@ -117,7 +113,6 @@ def visualize_point_cloud(point_cloud_data, window_name="3D Point Cloud", save_p
         ax.set_zlabel('Z (m)')
         ax.set_title(window_name)
 
-        # Set equal aspect ratio
         max_range = np.array([points[:, 0].max()-points[:, 0].min(),
                              points[:, 1].max()-points[:, 1].min(),
                              points[:, 2].max()-points[:, 2].min()]).max() / 2.0
@@ -147,7 +142,7 @@ def save_point_cloud(point_cloud_data, filename):
         print(f"Point cloud saved to {filename}")
     else:
         points, colors = point_cloud_data
-        # Save as numpy arrays
+
         np.savez(filename.replace('.ply', '.npz'),
                  points=points, colors=colors)
         print(f"Point cloud saved to {filename.replace('.ply', '.npz')}")
@@ -174,7 +169,6 @@ def compute_point_cloud_statistics(point_cloud_data):
         print(
             f"Z range: {np.min(points[:, 2]):.3f} to {np.max(points[:, 2]):.3f} m")
 
-        # Center of mass
         center = points.mean(axis=0)
         print(
             f"Center of mass: ({center[0]:.3f}, {center[1]:.3f}, {center[2]:.3f}) m")
@@ -196,13 +190,11 @@ def filter_point_cloud(point_cloud, min_bound=None, max_bound=None, nb_neighbors
     """
     filtered_cloud = point_cloud
 
-    # Crop point cloud if bounds are provided
     if min_bound is not None and max_bound is not None:
         bbox = o3d.geometry.AxisAlignedBoundingBox(
             min_bound=min_bound, max_bound=max_bound)
         filtered_cloud = filtered_cloud.crop(bbox)
 
-    # Statistical outlier removal
     filtered_cloud, ind = filtered_cloud.remove_statistical_outlier(
         nb_neighbors=nb_neighbors, std_ratio=std_ratio
     )
@@ -235,7 +227,6 @@ def compare_point_clouds(pc1, pc2, label1="Point Cloud 1", label2="Point Cloud 2
         print(f"{label1} bounding box: {extent1}")
         print(f"{label2} bounding box: {extent2}")
 
-        # Volume comparison
         volume1 = extent1[0] * extent1[1] * extent1[2]
         volume2 = extent2[0] * extent2[1] * extent2[2]
 
